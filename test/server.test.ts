@@ -14,7 +14,7 @@ describe("Server", () => {
   let listenStub: sinon.SinonStub;
 
   const loadServer = () => {
-    delete require.cache[require.resolve("../src/server")]; // Adjust the path as necessary
+    delete require.cache[require.resolve("../src/server")];
     return require("../src/server");
   };
 
