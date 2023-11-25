@@ -2,6 +2,10 @@ import http from "http";
 import express, { Express, Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import echoRoutes from "./routes/echo.route";
+import searchRoutes from "./routes/search.route";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const router: Express = express();
 
@@ -22,6 +26,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 router.use("/echo", echoRoutes);
+router.use("/search", searchRoutes);
 
 router.use((req: Request, res: Response, next: NextFunction) => {
     const error = new Error("not found");
