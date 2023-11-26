@@ -4,3 +4,11 @@ export const decodeHtmlEntity = (str: string) => {
     return String.fromCharCode(dec);
   });
 };
+
+export const formatTimestamp = (ms: number) => {
+  const base = Math.floor(ms / 1000);
+  const minutes = Math.floor(base / 60);
+  const seconds = Math.floor(base % 60);
+
+  return minutes + ":" + (seconds > 9 ? seconds : "0"+seconds);
+}
