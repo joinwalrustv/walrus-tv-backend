@@ -89,3 +89,46 @@ export const getSoundcloudSearchResults = async (req: Request, res: Response, ne
     return res.status(403).send({ message: "The SoundCloud search quota has exeeded the limit. Please try again later." });
   }
 };
+
+export const getVimeoSearchResults = async (req: Request, res: Response, next: NextFunction) => {
+  const query = req.query.q;
+
+  if (!query)
+    return res.status(400).send({ message: "Invalid query." });
+
+  try {
+    const response = await axios
+      .get("https://api.vimeo.com/videos", {
+        params: {
+          query: query,
+          access_token: process.env.VIMEO_API_KEY,
+          page: 1,
+          fields: "uri,name,duration,pictures",
+          per_page: 15
+        }
+      });
+
+      const vimeoResults = [];
+      const videos = response.data.data;
+
+      for (const video of videos) {
+        const title = video.name;
+        const thumbnail = video.pictures.sizes[3].link;
+        const link = video.uri.replace("/videos/", "https://vimeo.com/");
+        const timestamp = formatTimestamp(video.duration * 1000);
+
+        vimeoResults.push({
+          title: title,
+          thumbnail: thumbnail,
+          link: link,
+          timestamp: timestamp
+        });
+      }
+
+      return res.send({ message: "Success.", contents: vimeoResults });
+  } catch (err) {
+    console.log("[getVimeoSearchResults] Error");
+    console.log(err);
+    return res.status(403).send({ message: "The Vimeo search quota has exeeded the limit. Please try again later." });
+  }
+};

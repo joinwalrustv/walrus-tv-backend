@@ -2,7 +2,7 @@ import chai, { expect } from "chai";
 import sinon from "sinon";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import { getSoundcloudSearchResults, getYoutubeSearchResults } from "../../src/controllers/search.controller";
+import { getSoundcloudSearchResults, getVimeoSearchResults, getYoutubeSearchResults } from "../../src/controllers/search.controller";
 import { Request, Response, NextFunction } from "express";
 import sinonChai from "sinon-chai";
 
@@ -172,6 +172,71 @@ describe("Search", () => {
   
       expect(res.status).to.have.been.calledWith(403);
       expect(res.send).to.have.been.calledWith({ message: "The SoundCloud search quota has exeeded the limit. Please try again later." });
+    });
+  });
+
+  describe("getVimeoSearchResults", () => {
+    let mock: MockAdapter;
+    let req: Partial<Request>;
+    let res: Partial<Response>;
+    let next: NextFunction;
+    const fakeData = {
+      data: [
+        {
+          name: "Video Title",
+          pictures: {
+            sizes: [{}, {}, {}, { link: "http://example.com/thumbnail.jpg" }]
+          },
+          uri: "/videos/123456",
+          duration: 120
+        }
+      ]
+    };
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      req = {
+        query: { q: "test" }
+      };
+      res = {
+        status: sinon.stub().returnsThis(),
+        send: sinon.spy()
+      };
+      next = sinon.spy();
+    });
+
+    it("should return 400 if query is not provided", async () => {
+      req.query = {};
+      await getVimeoSearchResults(req as Request, res as Response, next);
+      expect(res.status).to.have.been.calledWith(400);
+      expect(res.send).to.have.been.calledWith({ message: "Invalid query." });
+    });
+
+    it("should return search results if query is provided", async () => {
+      mock.onGet("https://api.vimeo.com/videos").reply(200, fakeData);
+
+      await getVimeoSearchResults(req as Request, res as Response, next);
+
+      expect(res.send).to.have.been.calledWith({
+        message: "Success.",
+        contents: [
+          {
+            title: "Video Title",
+            thumbnail: "http://example.com/thumbnail.jpg",
+            link: "https://vimeo.com/123456",
+            timestamp: "2:00"
+          }
+        ]
+      });
+    });
+
+    it("should return 403 on axios error", async () => {
+      mock.onGet("https://api.vimeo.com/videos").networkError();
+
+      await getVimeoSearchResults(req as Request, res as Response, next);
+
+      expect(res.status).to.have.been.calledWith(403);
+      expect(res.send).to.have.been.calledWith({ message: "The Vimeo search quota has exeeded the limit. Please try again later." });
     });
   });
 });
