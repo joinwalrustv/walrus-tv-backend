@@ -132,3 +132,45 @@ export const getVimeoSearchResults = async (req: Request, res: Response, next: N
     return res.status(403).send({ message: "The Vimeo search quota has exeeded the limit. Please try again later." });
   }
 };
+
+export const getTwitchSearchResults = async (req: Request, res: Response, next: NextFunction) => {
+  const query = req.query.q;
+
+  if (!query)
+    return res.status(400).send({ message: "Invalid query." });
+
+  try {
+    const requestData = `client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`;
+    const apiKeyResponse = await axios.post("https://id.twitch.tv/oauth2/token", requestData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    });
+
+    const token = apiKeyResponse.data.access_token;
+
+    const twitchResponse = await axios.get(`https://api.twitch.tv/helix/search/channels?query=${query}&live_only=true`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Client-Id": process.env.TWITCH_CLIENT_ID
+      }
+    });
+
+    const data = twitchResponse.data.data;
+    const twitchResults = [];
+
+    for (const channel of data) {
+      twitchResults.push({
+        title: channel.title,
+        link: `https://twitch.tv/${channel.broadcaster_login}`,
+        thumbnail: channel.thumbnail_url
+      });
+    }
+
+    return res.status(200).send({ message: "Success.", contents: twitchResults });
+  } catch (err) {
+    console.log("[getTwitchSearchResults] Error");
+    console.log(err);
+    return res.status(403).send({ message: "The Twitch search quota has exeeded the limit. Please try again later." });
+  }
+};

@@ -2,7 +2,7 @@ import chai, { expect } from "chai";
 import sinon from "sinon";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import { getSoundcloudSearchResults, getVimeoSearchResults, getYoutubeSearchResults } from "../../src/controllers/search.controller";
+import { getSoundcloudSearchResults, getTwitchSearchResults, getVimeoSearchResults, getYoutubeSearchResults } from "../../src/controllers/search.controller";
 import { Request, Response, NextFunction } from "express";
 import sinonChai from "sinon-chai";
 
@@ -237,6 +237,79 @@ describe("Search", () => {
 
       expect(res.status).to.have.been.calledWith(403);
       expect(res.send).to.have.been.calledWith({ message: "The Vimeo search quota has exeeded the limit. Please try again later." });
+    });
+  });
+
+  describe("getTwitchSearchResults", () => {
+    let mock: MockAdapter;
+    let req: Partial<Request>;
+    let res: Partial<Response>;
+    let next: NextFunction;
+    const tokenResponseData = {
+      access_token: 'testToken',
+    };
+    const fakeTwitchData = {
+      data: [
+        {
+          title: "Channel Title",
+          broadcaster_login: "channelname",
+          thumbnail_url: "http://example.com/thumbnail.jpg",
+        }
+      ]
+    };
+
+    beforeEach(() => {
+      mock = new MockAdapter(axios);
+      req = {
+        query: { q: "test" }
+      };
+      res = {
+        status: sinon.stub().returnsThis(),
+        send: sinon.spy()
+      };
+      next = sinon.spy();
+
+      process.env.TWITCH_CLIENT_ID = 'testClientId';
+      process.env.TWITCH_CLIENT_SECRET = 'testClientSecret';
+    });
+
+    afterEach(() => {
+      delete process.env.TWITCH_CLIENT_ID;
+      delete process.env.TWITCH_CLIENT_SECRET;
+    });
+
+    it("should return 400 if query is not provided", async () => {
+      req.query = {};
+      await getTwitchSearchResults(req as Request, res as Response, next);
+      expect(res.status).to.have.been.calledWith(400);
+      expect(res.send).to.have.been.calledWith({ message: "Invalid query." });
+    });
+
+    it("should return search results if query is provided", async () => {
+      mock.onPost("https://id.twitch.tv/oauth2/token").reply(200, tokenResponseData);
+      mock.onGet("https://api.twitch.tv/helix/search/channels?query=test&live_only=true").reply(200, fakeTwitchData);
+
+      await getTwitchSearchResults(req as Request, res as Response, next);
+
+      expect(res.send).to.have.been.calledWith({
+        message: "Success.",
+        contents: [
+          {
+            title: "Channel Title",
+            thumbnail: "http://example.com/thumbnail.jpg",
+            link: "https://twitch.tv/channelname"
+          }
+        ]
+      });
+    });
+
+    it("should return 403 on axios error", async () => {
+      mock.onPost("https://id.twitch.tv/oauth2/token").networkError();
+
+      await getTwitchSearchResults(req as Request, res as Response, next);
+
+      expect(res.status).to.have.been.calledWith(403);
+      expect(res.send).to.have.been.calledWith({ message: "The Twitch search quota has exeeded the limit. Please try again later." });
     });
   });
 });
