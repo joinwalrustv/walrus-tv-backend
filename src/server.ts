@@ -3,11 +3,16 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import echoRoutes from "./routes/echo.route";
 import searchRoutes from "./routes/search.route";
+import { Server, Socket } from "socket.io";
 import * as dotenv from "dotenv";
+import { handleChatMessages, handleDisconnect } from "./socket_handlers";
 
 dotenv.config();
 
 const router: Express = express();
+const httpServer = http.createServer(router);
+const io = new Server(httpServer);
+const PORT: any = process.env.PORT ?? 8000;
 
 router.use(morgan("dev")); // Logging
 router.use(express.urlencoded({ extended: false }));
@@ -35,8 +40,11 @@ router.use((req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-const httpServer = http.createServer(router);
-const PORT: any = process.env.PORT ?? 8000;
+io.on("connection", (socket: Socket) => {
+  handleChatMessages(io)(socket);
+  handleDisconnect(io)(socket);
+});
+
 httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
 
 export default router;
