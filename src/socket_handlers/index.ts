@@ -1,5 +1,5 @@
-import { handleChatMessages } from "./handleChatMessages.handler";
-import { handleDisconnect } from "./handleDisconnect.handler";
+import { handleChatMessages } from "./chatMessages.handler";
+import { handleDisconnect } from "./disconnect.handler";
 
 export {
   handleChatMessages,
