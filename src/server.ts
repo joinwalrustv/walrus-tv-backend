@@ -41,8 +41,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 io.on("connection", (socket: Socket) => {
-  handleChatMessages(io)(socket);
-  handleDisconnect(io)(socket);
+  handleChatMessages(io, socket);
+  handleDisconnect(io, socket);
 });
 
 httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
