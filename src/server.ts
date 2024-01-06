@@ -19,25 +19,25 @@ router.use(express.urlencoded({ extended: false }));
 router.use(express.json());
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "origin, X-Requested-With,Content-Type,Accept, Authorization");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "origin, X-Requested-With,Content-Type,Accept, Authorization");
 
-    if (req.method === "OPTIONS") {
-        res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
-        return res.status(200).json({});
-    }
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
+    return res.status(200).json({});
+  }
 
-    next();
+  next();
 });
 
 router.use("/echo", echoRoutes);
 router.use("/search", searchRoutes);
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-    const error = new Error("not found");
-    return res.status(404).json({
-        message: error.message
-    });
+  const error = new Error("not found");
+  return res.status(404).json({
+    message: error.message
+  });
 });
 
 io.on("connection", (socket: Socket) => {
