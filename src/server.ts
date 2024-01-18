@@ -5,7 +5,7 @@ import echoRoutes from "./routes/echo.route";
 import searchRoutes from "./routes/search.route";
 import { Server, Socket } from "socket.io";
 import * as dotenv from "dotenv";
-import { handleChatMessages, handleDisconnect } from "./socket_handlers";
+import { handleChatMessages, handleDisconnect } from "./handlers";
 
 dotenv.config();
 
