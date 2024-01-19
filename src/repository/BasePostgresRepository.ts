@@ -1,7 +1,8 @@
 import { Pool } from "pg";
 import PostgresConnection from "../db/PostgresConnection";
+import IRepository from "./IRepository";
 
-class BasePostgresRepository {
+class BasePostgresRepository implements IRepository {
   private db: Pool;
 
   constructor() {
