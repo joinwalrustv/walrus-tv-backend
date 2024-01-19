@@ -13,6 +13,12 @@ class UserRepository extends BaseRepository {
   }
 
   async registerNewUser(username: string, email: string, password: string) {
+    const existingUsername = await this.getDb().query("SELECT * FROM users WHERE LOWER(username) = $1", [username.toLowerCase()]);
+    if (existingUsername.rows.length > 0) return false;
+
+    const existingEmail = await this.getDb().query("SELECT * FROM users WHERE LOWER(email) = $1", [email.toLowerCase()]);
+    if (existingEmail.rows.length > 0) return false;
+
     const queryString = `
       INSERT INTO users(user_id, email, password_hash, username, avatar_url, created_at)
         VALUES ($1, $2, $3, $4, $5, $6)

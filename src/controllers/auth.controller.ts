@@ -8,9 +8,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const username = req.body.username;
     const password = req.body.password;
 
-    userRepository.registerNewUser(username, email, password);
-
-    return res.status(200).json({
+    if (await userRepository.registerNewUser(username, email, password)) {
+      return res.status(200).json({
         message: "Success"
-    });
+      });
+    } else {
+      return res.status(400).json({
+        message: "Error while registering user"
+      });
+    }
 };
