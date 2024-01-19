@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import PostgresConnection from "../db/PostgresConnection";
 
-class BaseRepository {
+class BasePostgresRepository {
   private db: Pool;
 
   constructor() {
@@ -13,4 +13,4 @@ class BaseRepository {
   }
 }
 
-export default BaseRepository;
+export default BasePostgresRepository;

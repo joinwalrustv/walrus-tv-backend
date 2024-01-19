@@ -1,8 +1,8 @@
-import BaseRepository from "./BaseRepository";
+import BasePostgresRepository from "./BasePostgresRepository";
 import { randomBytes } from "crypto";
 import { hash } from "bcryptjs";
 
-class UserRepository extends BaseRepository {
+class UserRepository extends BasePostgresRepository {
   constructor() {
     super();
   }
