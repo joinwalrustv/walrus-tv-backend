@@ -1,4 +1,7 @@
 import { Pool, PoolConfig } from "pg";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 class PostgresConnection {
   private static _instance: PostgresConnection;

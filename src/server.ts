@@ -3,6 +3,7 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import echoRoutes from "./routes/echo.route";
 import searchRoutes from "./routes/search.route";
+import authRoutes from "./routes/auth.routes";
 import { Server, Socket } from "socket.io";
 import * as dotenv from "dotenv";
 import { handleChatMessages, handleDisconnect } from "./handlers";
@@ -32,6 +33,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
 router.use("/echo", echoRoutes);
 router.use("/search", searchRoutes);
+router.use("/auth", authRoutes);
 
 router.use((req: Request, res: Response, next: NextFunction) => {
   const error = new Error("not found");
