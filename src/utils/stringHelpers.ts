@@ -12,3 +12,7 @@ export const formatTimestamp = (ms: number) => {
 
   return minutes + ":" + (seconds > 9 ? seconds : "0"+seconds);
 }
+
+export const randomRoomId = () => {
+  return Math.random().toString(36).slice(2, 9);
+};
